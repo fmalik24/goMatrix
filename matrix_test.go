@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"errors"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -202,21 +200,6 @@ func TestFlatten(testHelper *testing.T) {
 	}
 }
 
-func createMultipartFormData(testHelper *testing.T) (bytes.Buffer, *multipart.Writer) {
-	var fileBuffer bytes.Buffer
-	var err error
-	multipartWriter := multipart.NewWriter(&fileBuffer)
-	var fw io.Writer
-	if fw, err = multipartWriter.CreateFormFile("file", "fileName.txt"); err != nil {
-		testHelper.Errorf("Error creating writer: %v", err)
-	}
-	csvFileContents := []byte("1,2,3\n4,5,6\n7,8,9\n")
-	fw.Write(csvFileContents)
-
-	multipartWriter.Close()
-	return fileBuffer, multipartWriter
-}
-
 type mockRequestContext struct {
 	mockFormFile func(fileName string) (multipart.File, *multipart.FileHeader, error)
 }
@@ -243,3 +226,46 @@ func TestGetRecordsExceptionMessage(testHelper *testing.T) {
 		testHelper.Errorf("Not expecting this")
 	}
 }
+
+// func TestGetRecords(testHelper *testing.T) {
+
+// 	var fileBuffer bytes.Buffer
+// 	var err error
+// 	multipartWriter := multipart.NewWriter(&fileBuffer)
+// 	var fw io.Writer
+// 	if fw, err = multipartWriter.CreateFormFile("file", "fileName.txt"); err != nil {
+// 		testHelper.Errorf("Error creating writer: %v", err)
+// 	}
+// 	csvFileContents := []byte("1,2,3\n4,5,6\n7,8,9\n")
+
+// 	body := new(bytes.Buffer)
+// 	writer := multipart.NewWriter(body)
+// 	part, err := writer.CreateFormFile("file", "ddd.txt")
+
+// 	part.Write(csvFileContents)
+// 	fw.Write(csvFileContents)
+
+// 	multipartWriter.Close()
+
+// 	values := map[string]io.Reader{
+// 		"file":  io.Reader(bytes.NewReader(csvFileContents)),
+// 		"other": strings.NewReader("hello world!"),
+// 	}
+
+// 	mat := io.Reader(bytes.NewReader(csvFileContents))
+
+// 	mockRequestContext := &mockRequestContext{
+// 		mockFormFile: func(fileName string) (multipart.File, *multipart.FileHeader, error) {
+// 			// this time we want to mock our a failure scenario
+// 			return io.Reader(bytes.NewReader(csvFileContents)), nil, nil
+// 		},
+// 	}
+
+// 	// perform the function call we want to test
+// 	_, err = getMatrixFromRequest(mockRequestContext)
+// 	if err == nil {
+// 		testHelper.Errorf("Not expecting this")
+// 	}
+
+// 	// ... check for panic
+// }
