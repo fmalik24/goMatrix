@@ -143,22 +143,20 @@ func TestSum(testHelper *testing.T) {
 
 	csvFile, multipartWriter := createMultipartFormData(testHelper)
 
-	response := getFunctionFromServer(csvFile, testHelper, multipartWriter)
+	request, err := http.NewRequest("POST", "/sum", &csvFile)
+	if err != nil {
+		testHelper.Fatal(err)
+	}
 
-	// request, err := http.NewRequest("POST", "/sum", &csvFile)
-	// if err != nil {
-	// 	testHelper.Fatal(err)
-	// }
+	request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 
-	// request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
+	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	response := httptest.NewRecorder()
+	handler := http.HandlerFunc(sumOfMatrixEnteries)
 
-	// // We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
-	// response := httptest.NewRecorder()
-	// handler := http.HandlerFunc(sumOfMatrixEnteries)
-
-	// // Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// // directly and pass in our Request and ResponseRecorder.
-	// handler.ServeHTTP(response, request)
+	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
+	// directly and pass in our Request and ResponseRecorder.
+	handler.ServeHTTP(response, request)
 
 	if status := response.Code; status != http.StatusOK {
 		testHelper.Errorf("handler returned wrong status code: got %v want %v",
@@ -171,23 +169,6 @@ func TestSum(testHelper *testing.T) {
 		testHelper.Errorf("handler returned unexpected body: got %v want %v",
 			response.Body.String(), expected)
 	}
-}
-
-func getFunctionFromServer(csvFile bytes.Buffer, testHelper *testing.T, multipartWriter *multipart.Writer, response *ResponseRecorder) {
-	request, err := http.NewRequest("POST", "/sum", &csvFile)
-	if err != nil {
-		testHelper.Fatal(err)
-	}
-
-	request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
-
-	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
-	response = httptest.NewRecorder()
-	handler := http.HandlerFunc(sumOfMatrixEnteries)
-
-	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(response, request)
 }
 
 func TestFlatten(testHelper *testing.T) {
@@ -261,26 +242,4 @@ func TestGetRecordsExceptionMessage(testHelper *testing.T) {
 	if err == nil {
 		testHelper.Errorf("Not expecting this")
 	}
-
-	// ... check for panic
 }
-
-// func TestGetRecords(testHelper *testing.T) {
-
-// 	data, w := createMultipartFormData(testHelper)
-
-// 	mockRequestContext := &mockRequestContext{
-// 		mockFormFile: func(fileName string) (multipart.File, *multipart.FileHeader, error) {
-// 			// this time we want to mock our a failure scenario
-// 			return &data, nil, nil
-// 		},
-// 	}
-
-// 	// perform the function call we want to test
-// 	_, err := getMatrixFromRequest(mockRequestContext)
-// 	if err == nil {
-// 		testHelper.Errorf("Not expecting this")
-// 	}
-
-// 	// ... check for panic
-// }
