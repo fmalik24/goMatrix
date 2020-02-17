@@ -46,9 +46,9 @@ func getTransposedMatrix(records [][]string) string {
 
 	var accumulator string
 	for i := 0; i < len(records); i++ {
-		coloumnLen := len(records[i])
-		if rowLength != coloumnLen {
-			return fmt.Sprintf("Invalid Entry: Row size is %d which is not equal to column of size %d\n", rowLength, coloumnLen)
+		coloumnLength := len(records[i])
+		if rowLength != coloumnLength {
+			return fmt.Sprintf("Invalid Entry: Row size is %d which is not equal to column of size %d\n", rowLength, coloumnLength)
 		}
 		transposeMatrix[i] = make([]string, len(records[i]))
 		copy(transposeMatrix[i], records[i])
