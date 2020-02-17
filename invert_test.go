@@ -23,7 +23,7 @@ func TestGetTransposedMatrix(testHelper *testing.T) {
 func TestGetTransposedMatrixError(testHelper *testing.T) {
 
 	// Arrange:
-	testData := [][]string{{"0", "1"}, {"3", "4", "3"}, {"6", "7"}}
+	testData := [][]string{{"0", "1", "2"}, {"3", "4"}, {"6", "7"}}
 
 	// Act:
 	trasnposedMatrix := getTransposedMatrix(testData)

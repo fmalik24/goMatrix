@@ -41,14 +41,15 @@ func getEcho(records [][]string) string {
 
 func getTransposedMatrix(records [][]string) string {
 
-	transposeMatrix := make([][]string, len(records))
-
-	if len(records) != len(records[0]) {
-		return fmt.Sprintf("Invalid Entry: Row size is %d which is not equal to column of size %d\n", len(records), len(records[0]))
-	}
+	rowLength := len(records)
+	transposeMatrix := make([][]string, rowLength)
 
 	var accumulator string
 	for i := 0; i < len(records); i++ {
+		coloumnLen := len(records[i])
+		if rowLength != coloumnLen {
+			return fmt.Sprintf("Invalid Entry: Row size is %d which is not equal to column of size %d\n", rowLength, coloumnLen)
+		}
 		transposeMatrix[i] = make([]string, len(records[i]))
 		copy(transposeMatrix[i], records[i])
 		for j := 0; j < len(records[0]); j++ {
