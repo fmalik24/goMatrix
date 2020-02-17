@@ -17,31 +17,35 @@ type requestClient interface {
 func getMatrixFromRequest(request requestClient) ([][]string, error) {
 	file, _, err := request.FormFile("file")
 	if err != nil {
-		fmt.Println((fmt.Sprintf("\nInfo: User has provided incorrect form file name %s", err.Error())))
-		return nil, errors.New("File not opened: We are unable to process your request. Can you try again with \nfile=@matrix.csv\n\n")
+		fmt.Println((fmt.Sprintf("Info: User has provided incorrect form file name %s", err.Error())))
+		return nil, errors.New("We are unable to process your request. Can you try again with \nfile=@matrix.csv\n")
 	}
 	defer file.Close()
 	records, err := csv.NewReader(file).ReadAll()
 	if err != nil {
-		return nil, errors.New("\nFileOpened: We are unable to process your request. Can you try again with \nfile=@matrix.csv\n\n")
+		return nil, errors.New("We are having a hard time reading the file. Can you make sure its a square and try again\n")
 	}
 
 	return records, nil
 }
 
-func getEcho(records [][]string) (string, error) {
+func getEcho(records [][]string) string {
 
 	var accumulator string
 	for _, row := range records {
 		accumulator = fmt.Sprintf("%s%s\n", accumulator, strings.Join(row, ","))
 	}
-	return accumulator, nil
+	return accumulator
 
 }
 
-func getTransposedMatrix(records [][]string) (string, error) {
+func getTransposedMatrix(records [][]string) string {
 
 	transposeMatrix := make([][]string, len(records))
+
+	if len(records) != len(records[0]) {
+		return fmt.Sprintf("Invalid Entry: Row size is %d which is not equal to column of size %d\n", len(records), len(records[0]))
+	}
 
 	var accumulator string
 	for i := 0; i < len(records); i++ {
@@ -51,50 +55,50 @@ func getTransposedMatrix(records [][]string) (string, error) {
 			transposeMatrix[i][j] = records[j][i]
 		}
 		accumulator = fmt.Sprintf("%s%s\n", accumulator, strings.Join(transposeMatrix[i][:], ","))
+
 	}
-	return accumulator, nil
+	return accumulator
 
 }
 
-func getFlattenedMatrix(records [][]string) (string, error) {
+func getFlattenedMatrix(records [][]string) string {
 	var strs []string
-	for _, v1 := range records {
-		s := strings.Join(v1, ",")
-		strs = append(strs, s)
+	for _, row := range records {
+		value := strings.Join(row, ",")
+		strs = append(strs, value)
 
 	}
-	s := strings.Join(strs, ",")
-	return s, nil
+	flattened := strings.Join(strs, ",")
+	return flattened
 }
 
-func getSumOfMatrixEnteries(records [][]string) (string, error) {
+func getSumOfMatrixEnteries(records [][]string) int {
 
 	var sum = 0
 	for i := 0; i < len(records); i++ {
 		for j := 0; j < len(records[0]); j++ {
-			i1, err := strconv.Atoi(records[j][i])
-			if err == nil {
-				sum += i1
-			}
+			entry, _ := strconv.Atoi(records[i][j])
+			sum += entry
 		}
 	}
 
-	return strconv.Itoa(sum), nil
+	return sum
 
 }
 
-func getProductOfMatrixEnteries(records [][]string) (string, error) {
+func getProductOfMatrixEnteries(records [][]string) int {
 
 	var product = 1
 	for i := 0; i < len(records); i++ {
 		for j := 0; j < len(records[0]); j++ {
-			i1, err := strconv.Atoi(records[j][i])
-			if err == nil {
-				product *= i1
+			entry, _ := strconv.Atoi(records[i][j])
+			if records[i][j] == "0" {
+				return 0
 			}
+			product *= entry
 		}
 	}
-	return strconv.Itoa(product), nil
+	return product
 }
 
 func echo(responseWriter http.ResponseWriter, request *http.Request) {
@@ -103,13 +107,7 @@ func echo(responseWriter http.ResponseWriter, request *http.Request) {
 		fmt.Fprint(responseWriter, error.Error())
 		return
 	}
-	var echo, err = getEcho(matrix)
-	if err != nil {
-		fmt.Fprint(responseWriter, error.Error())
-		return
-	}
-
-	fmt.Fprint(responseWriter, echo)
+	fmt.Fprint(responseWriter, getEcho(matrix))
 }
 
 func invert(responseWriter http.ResponseWriter, request *http.Request) {
@@ -119,11 +117,7 @@ func invert(responseWriter http.ResponseWriter, request *http.Request) {
 		fmt.Fprint(responseWriter, error.Error())
 		return
 	}
-	var invert, err = getTransposedMatrix(matrix)
-	if err != nil {
-		fmt.Fprint(responseWriter, error.Error())
-		return
-	}
+	var invert = getTransposedMatrix(matrix)
 
 	fmt.Fprint(responseWriter, invert)
 }
@@ -136,11 +130,7 @@ func flatten(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	var flattened, err = getFlattenedMatrix(matrix)
-	if err != nil {
-		fmt.Fprint(responseWriter, error.Error())
-		return
-	}
+	var flattened = getFlattenedMatrix(matrix)
 
 	fmt.Fprint(responseWriter, flattened)
 
@@ -154,13 +144,7 @@ func sumOfMatrixEnteries(responseWriter http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	var sum, err = getSumOfMatrixEnteries(matrix)
-	if err != nil {
-		fmt.Fprint(responseWriter, error.Error())
-		return
-	}
-
-	fmt.Fprint(responseWriter, sum)
+	fmt.Fprint(responseWriter, getSumOfMatrixEnteries(matrix))
 
 }
 
@@ -172,11 +156,7 @@ func productOfMatrixEnteries(responseWriter http.ResponseWriter, request *http.R
 		return
 	}
 
-	var product, err = getProductOfMatrixEnteries(matrix)
-	if err != nil {
-		fmt.Fprint(responseWriter, error.Error())
-		return
-	}
+	var product = getProductOfMatrixEnteries(matrix)
 
 	fmt.Fprint(responseWriter, product)
 }
