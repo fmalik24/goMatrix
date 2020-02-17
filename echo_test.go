@@ -70,7 +70,7 @@ func TestEchoWrongFile(testHelper *testing.T) {
 	// The data neccessary to call the end point
 	// csvFile created in memory with the given testMatrix
 	testMatrix := []byte("1,2,3\n4,5,6\n7,8,9\n")
-	csvFile, multipartWriter := createMultipartFormDataWithWrongFileName(testHelper, testMatrix)
+	csvFile, multipartWriter := createMultipartFormDataWithWrongFieldName(testHelper, testMatrix)
 
 	// The function mapped to the url and the http action
 	handlerFunction := http.HandlerFunc(echo)

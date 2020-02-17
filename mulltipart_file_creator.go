@@ -21,7 +21,7 @@ func createMultipartFormData(testHelper *testing.T, csvFileContents []byte) (byt
 	return fileBuffer, multipartWriter
 }
 
-func createMultipartFormDataWithWrongFileName(testHelper *testing.T, csvFileContents []byte) (bytes.Buffer, *multipart.Writer) {
+func createMultipartFormDataWithWrongFieldName(testHelper *testing.T, csvFileContents []byte) (bytes.Buffer, *multipart.Writer) {
 	var fileBuffer bytes.Buffer
 	var err error
 	multipartWriter := multipart.NewWriter(&fileBuffer)
@@ -31,7 +31,6 @@ func createMultipartFormDataWithWrongFileName(testHelper *testing.T, csvFileCont
 	}
 	fw.Write(csvFileContents)
 
-	
 	multipartWriter.Close()
 
 	return fileBuffer, multipartWriter

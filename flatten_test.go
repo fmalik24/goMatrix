@@ -22,8 +22,13 @@ func TestGetFlattenMatrix(testHelper *testing.T) {
 
 func TestGetFlattenMatrixSqaure(testHelper *testing.T) {
 
+	// Arrange:
 	testData := [][]string{{"1", "1", "2"}, {"3", "4", "5"}, {"6", "7", "8"}}
+
+	// Act:
 	falattened := getFlattenedMatrix(testData)
+
+	// Assert:
 	if falattened != "1,1,2,3,4,5,6,7,8" {
 		testHelper.Errorf("Not expecting this: %s", falattened)
 	}
@@ -80,7 +85,7 @@ func TestFlattenWrongFile(testHelper *testing.T) {
 	// The data neccessary to call the end point
 	// csvFile created in memory with the given testMatrix
 	testMatrix := []byte("1,2,3\n4,5,6\n7,8,9\n")
-	csvFile, multipartWriter := createMultipartFormDataWithWrongFileName(testHelper, testMatrix)
+	csvFile, multipartWriter := createMultipartFormDataWithWrongFieldName(testHelper, testMatrix)
 
 	// The function mapped to the url and the http action
 	handlerFunction := http.HandlerFunc(flatten)

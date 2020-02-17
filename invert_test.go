@@ -12,7 +12,7 @@ func TestGetTransposedMatrix(testHelper *testing.T) {
 	testData := [][]string{{"0", "1", "2"}, {"3", "4", "5"}, {"6", "7", "8"}}
 
 	// Act:
-	trasnposedMatrix := getTransposedMatrix(testData)
+	trasnposedMatrix := getInvertedMatrix(testData)
 
 	// Assert:
 	if trasnposedMatrix != "0,3,6\n1,4,7\n2,5,8\n" {
@@ -26,7 +26,7 @@ func TestGetTransposedMatrixError(testHelper *testing.T) {
 	testData := [][]string{{"0", "1", "2"}, {"3", "4"}, {"6", "7"}}
 
 	// Act:
-	trasnposedMatrix := getTransposedMatrix(testData)
+	trasnposedMatrix := getInvertedMatrix(testData)
 
 	// Assert:
 	if trasnposedMatrix != "Invalid Entry: Row size is 3 which is not equal to column of size 2\n" {
@@ -130,7 +130,7 @@ func TestInvertWrongFile(testHelper *testing.T) {
 	// The data neccessary to call the end point
 	// csvFile created in memory with the given testMatrix
 	testMatrix := []byte("1,2,3\n4,5,6\n7,8,9\n")
-	csvFile, multipartWriter := createMultipartFormDataWithWrongFileName(testHelper, testMatrix)
+	csvFile, multipartWriter := createMultipartFormDataWithWrongFieldName(testHelper, testMatrix)
 
 	// The function mapped to the url and the http action
 	handlerFunction := http.HandlerFunc(invert)
