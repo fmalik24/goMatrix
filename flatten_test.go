@@ -105,11 +105,6 @@ func TestFlattenWrongFile(testHelper *testing.T) {
 
 	// Assert:
 	// The status code is as per expectation
-
-	if status := response.Code; status != http.StatusOK {
-		testHelper.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
 	if status := response.Code; status != http.StatusOK {
 		testHelper.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)

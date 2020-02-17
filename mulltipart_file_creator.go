@@ -31,6 +31,8 @@ func createMultipartFormDataWithWrongFileName(testHelper *testing.T, csvFileCont
 	}
 	fw.Write(csvFileContents)
 
+	
 	multipartWriter.Close()
+
 	return fileBuffer, multipartWriter
 }
