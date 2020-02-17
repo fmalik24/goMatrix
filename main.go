@@ -17,13 +17,13 @@ type requestClient interface {
 func getMatrixFromRequest(request requestClient) ([][]string, error) {
 	file, _, err := request.FormFile("file")
 	if err != nil {
-		fmt.Println((fmt.Sprintf("Info: User has provided incorrect form file name %s", err.Error())))
-		return nil, errors.New("We are unable to process your request. Can you try again with \nfile=@matrix.csv\n")
+		fmt.Println((fmt.Sprintf("info: User has provided incorrect form file name %s", err.Error())))
+		return nil, errors.New("we are unable to process your request. can you try again with \nfile=@matrix.csv")
 	}
 	defer file.Close()
 	records, err := csv.NewReader(file).ReadAll()
 	if err != nil {
-		return nil, errors.New("We are having a hard time reading the file. Can you make sure its a square and try again\n")
+		return nil, fmt.Errorf("we are having a hard time reading the file. can you make sure its a square and try again: \n%s", err.Error())
 	}
 
 	return records, nil

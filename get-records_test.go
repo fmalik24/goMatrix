@@ -33,9 +33,6 @@ func TestGetRecordsExceptionMessage(testHelper *testing.T) {
 	}
 }
 
-
-
-
 // func TestGetRecords(testHelper *testing.T) {
 
 // 	var fileBuffer bytes.Buffer

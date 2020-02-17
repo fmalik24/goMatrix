@@ -6,9 +6,15 @@ import (
 	"testing"
 )
 
-func TestGetSumOfMatrixEnteries1(testHelper *testing.T) {
+func TestGetSumOfMatrixEnteries(testHelper *testing.T) {
 
-	sum := getSumOfMatrixEnteries([][]string{{"0", "1", "2"}, {"3", "4", "5"}, {"6", "7", "8"}})
+	// Arrange
+	testData := [][]string{{"0", "1", "2"}, {"3", "4", "5"}, {"6", "7", "8"}}
+
+	// Act
+	sum := getSumOfMatrixEnteries(testData)
+
+	// Assert
 	if sum != 36 {
 		testHelper.Errorf("Not expecting this: %d", sum)
 	}
@@ -16,28 +22,40 @@ func TestGetSumOfMatrixEnteries1(testHelper *testing.T) {
 
 func TestSum(testHelper *testing.T) {
 
-	csvFile, multipartWriter := createMultipartFormData(testHelper, []byte("1,2,3\n4,5,6\n7,8,9\n"))
+	// Arrange:
+	// The data neccessary to call the end point
+	// csvFile created in memory with the given testMatrix
+	testMatrix := []byte("1,2,3\n4,5,6\n7,8,9\n")
+	csvFile, multipartWriter := createMultipartFormData(testHelper, testMatrix)
 
-	request, err := http.NewRequest("POST", "/sum", &csvFile)
+	// The function mapped to the url and the http action
+	handlerFunction := http.HandlerFunc(sumOfMatrixEnteries)
+	url := "/sum"
+	httpVerb := "POST"
+
+	// Setup the request
+	request, err := http.NewRequest(httpVerb, url, &csvFile)
 	if err != nil {
 		testHelper.Fatal(err)
 	}
 
+	// Setup the Content-Type to be of MultipartFomData
 	request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 
-	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	// Setup the response recorder
 	response := httptest.NewRecorder()
-	handler := http.HandlerFunc(sumOfMatrixEnteries)
 
-	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(response, request)
+	//Act:
+	// Trigger HTTP request with the given data
+	handlerFunction.ServeHTTP(response, request)
+
+	// Assert:
+	// The status code is as per expectation
 
 	if status := response.Code; status != http.StatusOK {
 		testHelper.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-
 	// Check the response body is what we expect.
 	expected := "45"
 	if response.Body.String() != expected {
@@ -48,29 +66,42 @@ func TestSum(testHelper *testing.T) {
 
 func TestSumWrongFile(testHelper *testing.T) {
 
-	csvFile, multipartWriter := createMultipartFormDataWithWrongFileName(testHelper, []byte("1,2\n4,5,6\n7,8,9\n"))
-	request, err := http.NewRequest("POST", "/sum", &csvFile)
+	// Arrange:
+	// The data neccessary to call the end point
+	// csvFile created in memory with the given testMatrix
+	testMatrix := []byte("1,2,3\n4,5,6\n7,8,9\n")
+	csvFile, multipartWriter := createMultipartFormDataWithWrongFileName(testHelper, testMatrix)
+
+	// The function mapped to the url and the http action
+	handlerFunction := http.HandlerFunc(sumOfMatrixEnteries)
+	url := "/sum"
+	httpVerb := "POST"
+
+	// Setup the request
+	request, err := http.NewRequest(httpVerb, url, &csvFile)
 	if err != nil {
 		testHelper.Fatal(err)
 	}
 
+	// Setup the Content-Type to be of MultipartFomData
 	request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 
-	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	// Setup the response recorder
 	response := httptest.NewRecorder()
-	handler := http.HandlerFunc(sumOfMatrixEnteries)
 
-	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(response, request)
+	//Act:
+	// Trigger HTTP request with the given data
+	handlerFunction.ServeHTTP(response, request)
+
+	// Assert:
+	// The status code is as per expectation
 
 	if status := response.Code; status != http.StatusOK {
 		testHelper.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-
 	// Check the response body is what we expect.
-	expected := "We are unable to process your request. Can you try again with \nfile=@matrix.csv\n"
+	expected := "we are unable to process your request. can you try again with \nfile=@matrix.csv"
 	if response.Body.String() != expected {
 		testHelper.Errorf("handler returned unexpected body: got %v want %v",
 			response.Body.String(), expected)
@@ -79,29 +110,42 @@ func TestSumWrongFile(testHelper *testing.T) {
 
 func TestSumWrongData(testHelper *testing.T) {
 
-	csvFile, multipartWriter := createMultipartFormData(testHelper, []byte("1,2\n4,5,6\n7,8,9\n"))
-	request, err := http.NewRequest("POST", "/sum", &csvFile)
+	// Arrange:
+	// The data neccessary to call the end point
+	// csvFile created in memory with the given testMatrix
+	testMatrix := []byte("1,3\n4,5,6\n7,8,9\n")
+	csvFile, multipartWriter := createMultipartFormData(testHelper, testMatrix)
+
+	// The function mapped to the url and the http action
+	handlerFunction := http.HandlerFunc(sumOfMatrixEnteries)
+	url := "/sum"
+	httpVerb := "POST"
+
+	// Setup the request
+	request, err := http.NewRequest(httpVerb, url, &csvFile)
 	if err != nil {
 		testHelper.Fatal(err)
 	}
 
+	// Setup the Content-Type to be of MultipartFomData
 	request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 
-	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	// Setup the response recorder
 	response := httptest.NewRecorder()
-	handler := http.HandlerFunc(sumOfMatrixEnteries)
 
-	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(response, request)
+	//Act:
+	// Trigger HTTP request with the given data
+	handlerFunction.ServeHTTP(response, request)
+
+	// Assert:
+	// The status code is as per expectation
 
 	if status := response.Code; status != http.StatusOK {
 		testHelper.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-
 	// Check the response body is what we expect.
-	expected := "We are having a hard time reading the file. Can you make sure its a square and try again\n"
+	expected := "we are having a hard time reading the file. can you make sure its a square and try again: \nrecord on line 2: wrong number of fields"
 	if response.Body.String() != expected {
 		testHelper.Errorf("handler returned unexpected body: got %v want %v",
 			response.Body.String(), expected)

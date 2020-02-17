@@ -6,17 +6,24 @@ import (
 	"testing"
 )
 
-func TestGetFlattenMatrix1(testHelper *testing.T) {
+func TestGetFlattenMatrix(testHelper *testing.T) {
 
-	falattened := getFlattenedMatrix([][]string{{"1", "2"}, {"3", "4"}, {"5", "6"}})
+	// Arrange:
+	testData := [][]string{{"1", "2"}, {"3", "4"}, {"5", "6"}}
+
+	// Act:
+	falattened := getFlattenedMatrix(testData)
+
+	// Assert:
 	if falattened != "1,2,3,4,5,6" {
 		testHelper.Errorf("Not expecting this: %s", falattened)
 	}
 }
 
-func TestGetFlattenMatrix2(testHelper *testing.T) {
+func TestGetFlattenMatrixSqaure(testHelper *testing.T) {
 
-	falattened := getFlattenedMatrix([][]string{{"1", "1", "2"}, {"3", "4", "5"}, {"6", "7", "8"}})
+	testData := [][]string{{"1", "1", "2"}, {"3", "4", "5"}, {"6", "7", "8"}}
+	falattened := getFlattenedMatrix(testData)
 	if falattened != "1,1,2,3,4,5,6,7,8" {
 		testHelper.Errorf("Not expecting this: %s", falattened)
 	}
@@ -24,52 +31,35 @@ func TestGetFlattenMatrix2(testHelper *testing.T) {
 
 func TestFlatten(testHelper *testing.T) {
 
-	csvFile, multipartWriter := createMultipartFormData(testHelper, []byte("1,2,3\n4,5,6\n7,8,9\n"))
-	request, err := http.NewRequest("POST", "/flatten", &csvFile)
+	// Arrange:
+	// The data neccessary to call the end point
+	// csvFile created in memory with the given testMatrix
+	testMatrix := []byte("1,2,3\n4,5,6\n7,8,9\n")
+	csvFile, multipartWriter := createMultipartFormData(testHelper, testMatrix)
+
+	// The function mapped to the url and the http action
+	handlerFunction := http.HandlerFunc(flatten)
+	url := "/flatten"
+	httpVerb := "POST"
+
+	// Setup the request
+	request, err := http.NewRequest(httpVerb, url, &csvFile)
 	if err != nil {
 		testHelper.Fatal(err)
 	}
 
+	// Setup the Content-Type to be of MultipartFomData
 	request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 
-	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
-	responseRecorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(flatten)
-
-	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(responseRecorder, request)
-
-	if status := responseRecorder.Code; status != http.StatusOK {
-		testHelper.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
-
-	// Check the response body is what we expect.
-	expected := "1,2,3,4,5,6,7,8,9"
-	if responseRecorder.Body.String() != expected {
-		testHelper.Errorf("handler returned unexpected body: got %v want %v",
-			responseRecorder.Body.String(), expected)
-	}
-}
-
-func TestFlattenWrongFile(testHelper *testing.T) {
-
-	csvFile, multipartWriter := createMultipartFormDataWithWrongFileName(testHelper, []byte("1,2\n4,5,6\n7,8,9\n"))
-	request, err := http.NewRequest("POST", "/flatten", &csvFile)
-	if err != nil {
-		testHelper.Fatal(err)
-	}
-
-	request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
-
-	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	// Setup the response recorder
 	response := httptest.NewRecorder()
-	handler := http.HandlerFunc(flatten)
 
-	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(response, request)
+	//Act:
+	// Trigger HTTP request with the given data
+	handlerFunction.ServeHTTP(response, request)
+
+	// Assert:
+	// The status code is as per expectation
 
 	if status := response.Code; status != http.StatusOK {
 		testHelper.Errorf("handler returned wrong status code: got %v want %v",
@@ -77,7 +67,56 @@ func TestFlattenWrongFile(testHelper *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	expected := "We are unable to process your request. Can you try again with \nfile=@matrix.csv\n"
+	expected := "1,2,3,4,5,6,7,8,9"
+	if response.Body.String() != expected {
+		testHelper.Errorf("handler returned unexpected body: got %v want %v",
+			response.Body.String(), expected)
+	}
+}
+
+func TestFlattenWrongFile(testHelper *testing.T) {
+
+	// Arrange:
+	// The data neccessary to call the end point
+	// csvFile created in memory with the given testMatrix
+	testMatrix := []byte("1,2,3\n4,5,6\n7,8,9\n")
+	csvFile, multipartWriter := createMultipartFormDataWithWrongFileName(testHelper, testMatrix)
+
+	// The function mapped to the url and the http action
+	handlerFunction := http.HandlerFunc(flatten)
+	url := "/flatten"
+	httpVerb := "POST"
+
+	// Setup the request
+	request, err := http.NewRequest(httpVerb, url, &csvFile)
+	if err != nil {
+		testHelper.Fatal(err)
+	}
+
+	// Setup the Content-Type to be of MultipartFomData
+	request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
+
+	// Setup the response recorder
+	response := httptest.NewRecorder()
+
+	//Act:
+	// Trigger HTTP request with the given data
+	handlerFunction.ServeHTTP(response, request)
+
+	// Assert:
+	// The status code is as per expectation
+
+	if status := response.Code; status != http.StatusOK {
+		testHelper.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+	if status := response.Code; status != http.StatusOK {
+		testHelper.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	expected := "we are unable to process your request. can you try again with \nfile=@matrix.csv"
 	if response.Body.String() != expected {
 		testHelper.Errorf("handler returned unexpected body: got %v want %v",
 			response.Body.String(), expected)
@@ -86,21 +125,35 @@ func TestFlattenWrongFile(testHelper *testing.T) {
 
 func TestFlattenWrongData(testHelper *testing.T) {
 
-	csvFile, multipartWriter := createMultipartFormData(testHelper, []byte("1,2\n4,5,6\n7,8,9\n"))
-	request, err := http.NewRequest("POST", "/flatten", &csvFile)
+	// Arrange:
+	// The data neccessary to call the end point
+	// csvFile created in memory with the given testMatrix
+	testMatrix := []byte("1,2\n4,5,6\n7,8,9\n")
+	csvFile, multipartWriter := createMultipartFormData(testHelper, testMatrix)
+
+	// The function mapped to the url and the http action
+	handlerFunction := http.HandlerFunc(flatten)
+	url := "/flatten"
+	httpVerb := "POST"
+
+	// Setup the request
+	request, err := http.NewRequest(httpVerb, url, &csvFile)
 	if err != nil {
 		testHelper.Fatal(err)
 	}
 
+	// Setup the Content-Type to be of MultipartFomData
 	request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 
-	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	// Setup the response recorder
 	response := httptest.NewRecorder()
-	handler := http.HandlerFunc(flatten)
 
-	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(response, request)
+	//Act:
+	// Trigger HTTP request with the given data
+	handlerFunction.ServeHTTP(response, request)
+
+	// Assert:
+	// The status code is as per expectation
 
 	if status := response.Code; status != http.StatusOK {
 		testHelper.Errorf("handler returned wrong status code: got %v want %v",
@@ -108,7 +161,7 @@ func TestFlattenWrongData(testHelper *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	expected := "We are having a hard time reading the file. Can you make sure its a square and try again\n"
+	expected := "we are having a hard time reading the file. can you make sure its a square and try again: \nrecord on line 2: wrong number of fields"
 	if response.Body.String() != expected {
 		testHelper.Errorf("handler returned unexpected body: got %v want %v",
 			response.Body.String(), expected)
